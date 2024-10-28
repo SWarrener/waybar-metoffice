@@ -101,7 +101,6 @@ def process_weather_data(hourly_weather_data: str, three_hourly_weather_data: st
             "min_screen_temp": int(round(data["minScreenAirTemp"], 0)),
             "wind_speed": int(round(data["windSpeed10m"], 0)),
             "wind_direction": data["windDirectionFrom10m"],
-            "rain_chance": int(round(data["probOfPrecipitation"], 0)),
             "humidity": int(round(data["screenRelativeHumidity"], 0)),
             "feels_like": int(round(data["feelsLikeTemperature"], 0)),
             "precip_amount": data["totalPrecipAmount"]
@@ -121,10 +120,6 @@ def process_weather_data(hourly_weather_data: str, three_hourly_weather_data: st
             "weather_code": data["significantWeatherCode"],
             "max_screen_temp": max_screen_temp,
             "min_screen_temp": min_screen_temp,
-#            "wind_speed": int(round(data["windSpeed10m"], 0)),
-#            "wind_direction": data["windDirectionFrom10m"],
-#            "rain_chance": int(round(data["probOfPrecipitation"], 0)),
-#            "humidity": int(round(data["screenRelativeHumidity"], 0)),
             "precip_amount": data["totalPrecipAmount"]
         }
 
@@ -161,8 +156,8 @@ def format_today(today_data, location: str = None, wc = WeatherCode()):
                 tooltip += f"Location: {location}\n\n"
             else:
                 tooltip +="\n"
-            tooltip += f"Today: {dt.date.today().strftime("%d/%m/%Y")}\n"
-            tooltip += f"Max: {max_today}°C\t Min: {min_today}°C\t Total Precipitation: {precip_today}mm\n"
+            tooltip += f"<b>Today: {dt.date.today().strftime("%d/%m/%Y")}</b>\n"
+            tooltip += f"Max: {max_today}°C Min: {min_today}°C Total Precipitation: {precip_today}mm\n"
         else:
             hour = dt.datetime.fromisoformat(timestamp[timestamp.find(":")+1:])
             tooltip += f"{hour.strftime("%H:%M")}\t{screen_temp} {wc.get_string(code)}\n"
@@ -185,18 +180,18 @@ def format_future(future_data, tooltip, wc = WeatherCode()):
     for i, day_data in enumerate(future_data):
         day = dt.date.today() + dt.timedelta(i+1)
         if i == 0:
-            tooltip += f"\nTomorrow: {day.strftime("%d/%m/%Y")}\n"
+            tooltip += f"\n<b>Tomorrow: {day.strftime("%d/%m/%Y")}</b>\n"
         else:
-            tooltip += f"\n{day.strftime("%d/%m/%Y")}\n"
+            tooltip += f"\n<b>{day.strftime("%d/%m/%Y")}</b>\n"
         max_day = max(data["max_screen_temp"] for data in day_data.values())
         min_day = min(data["min_screen_temp"] for data in day_data.values())
         precip_day = round(sum(data["precip_amount"] for data in day_data.values()),2)
-        tooltip += f"Max: {max_day}°C\t Min: {min_day}°C\t Total Precipitation: {precip_day}mm\n"
+        tooltip += f"Max: {max_day}°C Min: {min_day}°C Total Precipitation: {precip_day}mm\n"
         for timestamp, data in day_data.items():
             hour = dt.datetime.fromisoformat(timestamp[timestamp.find(":")+1:])
             code = data["weather_code"]
             screen_temp = data["screen_temp"]
-            tooltip += f"{hour.strftime("%H:%M")}\t{code} {wc.get_string(screen_temp)}\n"
+            tooltip += f"{hour.strftime("%H:%M")}\t{screen_temp} {wc.get_string(code)}\n"
 
     return tooltip[:-1] #  Remove the last newline
 
@@ -268,7 +263,7 @@ if __name__ == "__main__":
         "--days",
         action="store",
         dest="days",
-        default=6,
+        default="6",
         help="How many days, including today, do you want displayed in the tooltip, must be between 2-6"
     )
     parser.add_argument(
@@ -322,9 +317,7 @@ if __name__ == "__main__":
     combined_data = process_weather_data(hourly_weather_data, three_hourly_weather_data, days)
 
     main_string, tooltip_string = format_data(combined_data, location_data)
-    print(main_string)
-    print(tooltip_string)
-    #print(json.dumps({'text': main_string, 'tooltip': tooltip_string}))
+    print(json.dumps({'text': main_string, 'tooltip': tooltip_string}))
 
 # Codes
 # -1    Trace Rain
