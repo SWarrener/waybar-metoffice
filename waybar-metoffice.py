@@ -8,7 +8,7 @@ from utils import WeatherCode
 
 # Get the forecast data using the met office API
 def retrieve_forecast(timesteps: str, api_header: str,
-                      lat: str, long: str, location: str = "False") -> str:
+                      lat: str, long: str, loc: str = "False") -> str:
     '''
     Get the forecast from the Met Office API
     
@@ -17,7 +17,7 @@ def retrieve_forecast(timesteps: str, api_header: str,
         api_header (str): api key for inclusion in the header
         lat (str): request location latitude
         long (str): request location longitude
-        location (str): set if you want the location returned or not
+        loc (str): set if you want the location returned or not
     
     Returns:
         str: forecast data in JSON format
@@ -29,7 +29,7 @@ def retrieve_forecast(timesteps: str, api_header: str,
     headers.update(api_header)
     params = {
         'excludeParameterMetadata' : "FALSE",
-        'includeLocationName' : location,
+        'includeLocationName' : loc,
         'latitude' : lat,
         'longitude' : long
         }
@@ -53,13 +53,13 @@ def retrieve_forecast(timesteps: str, api_header: str,
     return req.text
 
 
-def extract_data(forecast_data: str, location: str) -> tuple:
+def extract_data(forecast_data: str, loc: str) -> tuple:
     '''
     Extracts the useful bit of data out of the JSON
     
     Args:
         forecast_data (str): The full JSON fetched from the met office
-        location (str): set if you want the location returned or not
+        loc (str): set if you want the location returned or not
     
     Returns:
         tuple(str, str/None): weather data and either the location data or none
@@ -67,14 +67,14 @@ def extract_data(forecast_data: str, location: str) -> tuple:
     # Surely there is a better way to do this?
     data = json.loads(forecast_data)
     weather_data = data["features"][0]["properties"]["timeSeries"]
-    if location != "FALSE":
-        location_data = data["features"][0]["properties"]["location"]["name"]
+    if loc != "FALSE":
+        loc_data = data["features"][0]["properties"]["location"]["name"]
     else:
-        location_data = None
-    return (weather_data, location_data)
+        loc_data = None
+    return (weather_data, loc_data)
 
 
-def process_weather_data(hourly_weather_data: str, three_hourly_weather_data: str, days: int) -> dict:
+def process_weather_data(hourly_weather_data: str, three_hourly_weather_data: str, days_wanted: int) -> dict:
     '''
     Takes the data we want from the 2 forecasts and combines them into one
     dictionary, with the hourly data for the current day and the three hourly data
@@ -87,7 +87,6 @@ def process_weather_data(hourly_weather_data: str, three_hourly_weather_data: st
         
     Returns:
         dict: the combined weather data
-    
     '''
     weather_data = {}
     for data in hourly_weather_data:
@@ -110,7 +109,7 @@ def process_weather_data(hourly_weather_data: str, three_hourly_weather_data: st
         timestamp = dt.datetime.fromisoformat(data["time"]).astimezone()
         if timestamp.date() == dt.date.today():
             continue
-        if timestamp.date() == dt.date.today() + dt.timedelta(days+1):
+        if timestamp.date() == dt.date.today() + dt.timedelta(days_wanted+1):
             break #  Removes the partial day from the end of the forecast
         max_screen_temp = int(round(data["maxScreenAirTemp"], 0))
         min_screen_temp = int(round(data["minScreenAirTemp"], 0))
@@ -126,13 +125,13 @@ def process_weather_data(hourly_weather_data: str, three_hourly_weather_data: st
     return weather_data
 
 
-def format_today(today_data, location: str = None, wc = WeatherCode()):
+def format_today(today_data, loc: str = None, wc = WeatherCode()) -> tuple:
     '''
     Formats today's weather data into the main string and the tooltip
     
     Args:
         today_data (dict): A dictionary containing today's data
-        location (str): The string (or None) containing the users location Default: None
+        loc (str): The string (or None) containing the users location Default: None
         wc (WeatherCode): The weather code class
         
     Returns:
@@ -152,8 +151,8 @@ def format_today(today_data, location: str = None, wc = WeatherCode()):
             tooltip += f"Feels Like: {data["feels_like"]}°C\n"
             tooltip += f"Wind: {data["wind_speed"]} mph {wc.get_wind(direction)}\n"
             tooltip += f"Humidity: {data["humidity"]}%\n"
-            if location is not None:
-                tooltip += f"Location: {location}\n\n"
+            if loc is not None:
+                tooltip += f"Location: {loc}\n\n"
             else:
                 tooltip +="\n"
             tooltip += f"<b>Today: {dt.date.today().strftime("%d/%m/%Y")}</b>\n"
@@ -166,7 +165,7 @@ def format_today(today_data, location: str = None, wc = WeatherCode()):
     return (main, tooltip)
 
 
-def format_future(future_data, tooltip, wc = WeatherCode()):
+def format_future(future_data, tooltip, wc = WeatherCode()) -> str:
     ''''
     Formats the future weather data to the rest of the tooltip
     
@@ -198,13 +197,13 @@ def format_future(future_data, tooltip, wc = WeatherCode()):
     return tooltip[:-1] #  Remove the last newline
 
 
-def format_data(weather_data: dict, location: str = None):
+def format_data(weather_data: dict, loc: str = None) -> tuple:
     '''
     Formats the data into the main string and the tooltip that will be passed to Waybar
     
     Args:
         weather_data (dict): The unformatted weather data
-        location (str): The string (or None) containing the users location Default: None
+        loc (str): The string (or None) containing the users location Default: None
         
     Returns:
         tuple(str, str): A tuple containing the main string and the tooltip string
@@ -212,7 +211,7 @@ def format_data(weather_data: dict, location: str = None):
     wc = WeatherCode()
 
     today_data = {k: v for k, v in weather_data.items() if "Three" not in k}
-    main, tooltip = format_today(today_data, location, wc)
+    main, tooltip = format_today(today_data, loc, wc)
 
     future_data = {k: v for k, v in weather_data.items() if "Three" in k}
     # Take the dictionary and split it into a list of dictionaries, where each dict in the list
@@ -313,10 +312,10 @@ if __name__ == "__main__":
     three_hourly_forecast_data = retrieve_forecast("three-hourly", requestHeaders,
                                                    latitude, longitude)
 
-    hourly_weather_data, location_data = extract_data(hourly_forecast_data, location)
-    three_hourly_weather_data, _ = extract_data(three_hourly_forecast_data, "FALSE")
+    raw_hourly_data, location_data = extract_data(hourly_forecast_data, location)
+    raw_three_hourly_data, _ = extract_data(three_hourly_forecast_data, "FALSE")
 
-    combined_data = process_weather_data(hourly_weather_data, three_hourly_weather_data, days)
+    combined_data = process_weather_data(raw_hourly_data, raw_three_hourly_data, days)
 
     main_string, tooltip_string = format_data(combined_data, location_data)
     print(json.dumps({'text': main_string, 'tooltip': tooltip_string}))
