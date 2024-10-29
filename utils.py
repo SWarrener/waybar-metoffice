@@ -1,6 +1,9 @@
 class WeatherCode:
-    '''A basic class for converting weather codes and wind directions
-    to useful outputs'''
+    '''
+    A basic class for converting weather codes and wind directions
+    to useful outputs
+    '''
+
     weather_code_to_string = {
         -1: "Trace Rain",
         0: "Clear night",
@@ -36,52 +39,50 @@ class WeatherCode:
         30: "Thunder",
     }
 
-# Emoji codes are unused currently, anything with a hash at the end is an unsuitable emoji
-# for that weather code
-#    weather_code_to_emoji = {
-#        -1: "☀️", #
-#        0: "🌃",
-#        1: "☀️",
-#        2: "☀️", #
-#        3: "⛅",
-#        4: "☀️", #
-#        5: "🌫",
-#        6: "🌫",
-#        7: "☁️",
-#        8: "☀️", #
-#        9: "☀️",#
-#        10: "☀️",#
-#        11: "☀️",#
-#        12: "☀️",#
-#        13: "☀️",#
-#        14: "☀️",#
-#        15: "☀️",#
-#        16: "☀️",#
-#        17: "☀️",#
-#        18: "☀️",#
-#        19: "☀️",#
-#        20: "☀️",#
-#        21: "☀️",#
-#        22: "☀️",#
-#        23: "☀️",#
-#        24: "☀️",#
-#        25: "🌨️",
-#        26: "🌨️",
-#        27: "🌨️",
-#        28: "⛈️",
-#        29: "⛈️",
-#        30: "🌩️"
-#    }
+    weather_code_to_emoji = {
+        -1: "☁️",
+        0: "🌃",
+        1: "☀️",
+        2: "⛅",
+        3: "⛅",
+        4: "☀️",
+        5: "🌫",
+        6: "🌫",
+        7: "☁️",
+        8: "☁️",
+        9: "🌦️",
+        10: "🌦️",
+        11: "🌧️",
+        12: "🌧️",
+        13: "🌦️",
+        14: "🌦️",
+        15: "🌧️",
+        16: "🌨️",
+        17: "🌨️",
+        18: "🌨️",
+        19: "🌨️",
+        20: "🌨️",
+        21: "🌨️",
+        22: "🌨️",
+        23: "🌨️",
+        24: "🌨️",
+        25: "🌨️",
+        26: "🌨️",
+        27: "🌨️",
+        28: "⛈️",
+        29: "⛈️",
+        30: "🌩️"
+    }
 
     wind_dir_to_emoji = {
-        0 : "⬆️",
-        1 : "↗️",
-        2 : "➡️",
-        3 : "↘️",
-        4 : "⬇️",
-        5 : "↙️",
-        6 : "⬅️",
-        7 : "↖️"
+        0 : "⬆️", # N
+        1 : "↗️", # NE
+        2 : "➡️", # E
+        3 : "↘️", # SE
+        4 : "⬇️", # S
+        5 : "↙️", # SW
+        6 : "⬅️", # W
+        7 : "↖️"  # NW
     }
 
     def get_string(self, code: int):
@@ -98,20 +99,20 @@ class WeatherCode:
             return self.weather_code_to_string[code]
         return None
 
-# Currently unused, but here if we do add emojis to the tooltip
-#    def get_emoji(self, code: int):
-#        """
-#        Get the emoji string corresponding to a weather code
-#
-#        Args:
-#            code (int): The weather code
-#
-#        Returns:
-#            str/None: emoji if valid code or None if not
-#        """
-#        if code in self.weather_code_to_emoji:
-#            return self.weather_code_to_emoji[code]
-#        return None
+
+    def get_emoji(self, code: int):
+        """
+        Get the emoji string corresponding to a weather code
+
+        Args:
+            code (int): The weather code
+
+        Returns:
+            str/None: emoji if valid code or None if not
+        """
+        if code in self.weather_code_to_emoji:
+            return self.weather_code_to_emoji[code]
+        return None
 
     def get_wind(self, direction):
         """

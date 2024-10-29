@@ -147,7 +147,7 @@ def format_today(today_data, location: str = None, wc = WeatherCode()):
         screen_temp = data["screen_temp"]
         direction = data["wind_direction"]
         if i == 0:
-            main = main + f"{screen_temp}°C {wc.get_string(code)}"
+            main = main + f"{wc.get_emoji(code)} {screen_temp}°C {wc.get_string(code)}"
             tooltip += main + "\n"
             tooltip += f"Feels Like: {data["feels_like"]}°C\n"
             tooltip += f"Wind: {data["wind_speed"]} mph {wc.get_wind(direction)}\n"
@@ -160,7 +160,8 @@ def format_today(today_data, location: str = None, wc = WeatherCode()):
             tooltip += f"Max: {max_today}°C Min: {min_today}°C Total Precipitation: {precip_today}mm\n"
         else:
             hour = dt.datetime.fromisoformat(timestamp[timestamp.find(":")+1:])
-            tooltip += f"{hour.strftime("%H:%M")}\t{screen_temp} {wc.get_string(code)}\n"
+            tooltip += f"{hour.strftime("%H:%M")}\t"
+            tooltip += f"{wc.get_emoji(code)} {screen_temp} {wc.get_string(code)}\n"
 
     return (main, tooltip)
 
@@ -191,7 +192,8 @@ def format_future(future_data, tooltip, wc = WeatherCode()):
             hour = dt.datetime.fromisoformat(timestamp[timestamp.find(":")+1:])
             code = data["weather_code"]
             screen_temp = data["screen_temp"]
-            tooltip += f"{hour.strftime("%H:%M")}\t{screen_temp} {wc.get_string(code)}\n"
+            tooltip += f"{hour.strftime("%H:%M")}\t"
+            tooltip += f"{wc.get_emoji(code)} {screen_temp} {wc.get_string(code)}\n"
 
     return tooltip[:-1] #  Remove the last newline
 

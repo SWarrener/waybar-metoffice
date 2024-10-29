@@ -57,3 +57,6 @@ cover/
 
 # Any json data that ends up here
 *.json
+
+# VS code
+.vscode/
