@@ -35,17 +35,17 @@ def retrieve_forecast(timesteps: str, api_header: str,
         }
 
     success = False
-    retries = 5
+    retries = 3
 
     while not success and retries >0:
         try:
-            req = requests.get(url, headers=headers, params=params, timeout=10)
+            req = requests.get(url, headers=headers, params=params, timeout=4)
             success = True
-        except TimeoutError:
+        except Exception: # Seems reasonable to catch everything here
             retries -= 1
             time.sleep(10)
             if retries <= 0:
-                print("Could not connect to Met Office")
+                print(json.dumps({'text': "⚠️ Could not connect to Met Office", 'tooltip': ""}))
                 sys.exit()
 
     req.encoding = 'utf-8'
