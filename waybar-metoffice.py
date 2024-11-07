@@ -293,9 +293,11 @@ if __name__ == "__main__":
         print("ERROR: Latitude and longitude must be supplied")
         sys.exit()
 
-    if location not in ("TRUE", "FALSE"):
+    if location.upper() not in ("TRUE", "FALSE"):
         print("ERROR: The options for location are TRUE or FALSE")
         sys.exit()
+    else:
+        location = location.upper()
 
     if days.isnumeric():
         days = int(days)
