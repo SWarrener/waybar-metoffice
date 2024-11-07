@@ -32,7 +32,7 @@ Restart waybar and the module should appear with the current weather for the loc
 
 #### Optional
     -d Number of days, including today, you want the forecast for, Must be between 2 and 6. Default is 6
-    -l Sets if you want a string containing your location returned and included in the forecast. Options are true or false. Defaults to true.
+    -l Sets if you want a string containing your location returned and included in the forecast. Options are TRUE or FALSE. Defaults to TRUE.
 
 ## Thanks
 UK Met Office for providing the weather API and example download scripts
