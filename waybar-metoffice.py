@@ -160,7 +160,7 @@ def format_today(today_data, loc: str = None, wc = WeatherCode()) -> tuple:
         else:
             hour = dt.datetime.fromisoformat(timestamp[timestamp.find(":")+1:])
             tooltip += f"{hour.strftime("%H:%M")}\t"
-            tooltip += f"{wc.get_emoji(code)} {screen_temp} {wc.get_string(code)}\n"
+            tooltip += f"{wc.get_emoji(code)} {screen_temp}°C {wc.get_string(code)}\n"
 
     return (main, tooltip)
 
@@ -192,7 +192,7 @@ def format_future(future_data, tooltip, wc = WeatherCode()) -> str:
             code = data["weather_code"]
             screen_temp = data["screen_temp"]
             tooltip += f"{hour.strftime("%H:%M")}\t"
-            tooltip += f"{wc.get_emoji(code)} {screen_temp} {wc.get_string(code)}\n"
+            tooltip += f"{wc.get_emoji(code)} {screen_temp}°C {wc.get_string(code)}\n"
 
     return tooltip[:-1] #  Remove the last newline
 
