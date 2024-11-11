@@ -4,9 +4,9 @@ A waybar custom module that uses the UK met office to provide weather forecastin
 
 ## Usage
 
-Install [waybar ](https://github.com/Alexays/Waybar) and python on your machine. 
+Install [waybar](https://github.com/Alexays/Waybar) and python on your machine. 
 
-Make an account for the [UK Met Office](https://datahub.metoffice.gov.uk/), the script will use about 50 requests per day, so the free account offers more than enough API requests. Copy your API key. (note the keys are over a thousand characters long, so make sure you have all of it).
+Make an account for the [UK Met Office](https://datahub.metoffice.gov.uk/), the script will use about 50 requests per day, so the free account offers more than enough API requests. Copy your API key. (Note the keys are over a thousand characters long, so make sure you have all of it).
 
 Clone this repository `git clone https://github.com/SWarrener/waybar-metoffice.git`
 
@@ -20,7 +20,7 @@ In your waybar config file add the following:
 		"return-type": "json"
 	},
 
-Also include `"custom/weather"` in your modules. Replace the path to met-office.py with the relevant path for your machine
+Also include `"custom/weather"` in your modules. Replace the path to waybar-metoffice.py with the relevant path for your machine
 
 Restart waybar and the module should appear with the current weather for the location that you set.
 
