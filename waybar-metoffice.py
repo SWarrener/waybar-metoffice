@@ -143,10 +143,10 @@ def format_today(today_data, loc: str = None, wc = WeatherCode()) -> tuple:
     precip_today = round(sum(data["precip_amount"] for data in today_data.values()),2)
     for i, (timestamp, data) in enumerate(today_data.items()):
         code = data["weather_code"]
-        screen_temp = data["screen_temp"]
+        screen_temp = f"{data["screen_temp"]}°C"
         direction = data["wind_direction"]
         if i == 0:
-            main = main + f"{wc.get_emoji(code)} {screen_temp}°C {wc.get_string(code)}"
+            main = main + f"{wc.get_emoji(code)} {screen_temp} {wc.get_string(code)}"
             tooltip += main + "\n"
             tooltip += f"Feels Like: {data["feels_like"]}°C\n"
             tooltip += f"Wind: {data["wind_speed"]} mph {wc.get_wind(direction)}\n"
@@ -159,8 +159,10 @@ def format_today(today_data, loc: str = None, wc = WeatherCode()) -> tuple:
             tooltip += f"Max: {max_today}°C Min: {min_today}°C Total Precipitation: {precip_today}mm\n"
         else:
             hour = dt.datetime.fromisoformat(timestamp[timestamp.find(":")+1:])
+            spaces = 3 - len(str(data["screen_temp"]))
+            screen_temp = " " * spaces + screen_temp
             tooltip += f"{hour.strftime("%H:%M")}\t"
-            tooltip += f"{wc.get_emoji(code)} {screen_temp}°C {wc.get_string(code)}\n"
+            tooltip += f"{wc.get_emoji(code)} {screen_temp} {wc.get_string(code)}\n"
 
     return (main, tooltip)
 
@@ -190,9 +192,10 @@ def format_future(future_data, tooltip, wc = WeatherCode()) -> str:
         for timestamp, data in day_data.items():
             hour = dt.datetime.fromisoformat(timestamp[timestamp.find(":")+1:])
             code = data["weather_code"]
-            screen_temp = data["screen_temp"]
+            spaces = 3 - len(str(data["screen_temp"]))
+            screen_temp = " " * spaces + f"{data["screen_temp"]}°C"
             tooltip += f"{hour.strftime("%H:%M")}\t"
-            tooltip += f"{wc.get_emoji(code)} {screen_temp}°C {wc.get_string(code)}\n"
+            tooltip += f"{wc.get_emoji(code)} {screen_temp} {wc.get_string(code)}\n"
 
     return tooltip[:-1] #  Remove the last newline
 
