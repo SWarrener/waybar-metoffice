@@ -6,6 +6,40 @@ import datetime as dt
 import requests
 from utils import WeatherCode
 
+
+class TooltipLine:
+    '''
+    A class with the information for creating and formatting an hourly
+    line on the tooltip.
+    
+    Args:
+        code (int): The significant weather code
+        hour (datetime): The time for the tooltip line
+        temperature (int): The temperature for the tooltip line
+    '''
+
+    def __init__(self, code: int, hour: dt.datetime, temperature: int) -> None:
+        self.code = code
+        self.hour = hour
+        self.temp = temperature
+
+    def format_line(self, wc):
+        '''
+        Format the tooltip line using information supplied when class was created
+        
+        Args:
+            wc (WeatherCode): WeatherCode class
+        
+        Returns:
+            str: The formatted line
+        '''
+        spaces = 3 - len(str(self.temp))
+        screen_temp = " " * spaces + f"{self.temp}°C"
+        line = f"{self.hour.strftime("%H:%M")}\t"
+        line += f"{wc.get_emoji(self.code)} {screen_temp} {wc.get_string(self.code)}\n"
+        return line
+
+
 # Get the forecast data using the met office API
 def retrieve_forecast(timesteps: str, api_header: str,
                       lat: str, long: str, loc: str = "False") -> str:
@@ -137,17 +171,16 @@ def format_today(today_data, loc: str = None, wc = WeatherCode()) -> tuple:
     Returns:
         tuple(str, str): A tuple containing the main string and the tooltip string
     '''
-    tooltip, main = "", ""
     max_today = max(data["max_screen_temp"] for data in today_data.values())
     min_today = min(data["min_screen_temp"] for data in today_data.values())
     precip_today = round(sum(data["precip_amount"] for data in today_data.values()),2)
     for i, (timestamp, data) in enumerate(today_data.items()):
         code = data["weather_code"]
-        screen_temp = f"{data["screen_temp"]}°C"
+        screen_temp = data["screen_temp"]
         direction = data["wind_direction"]
         if i == 0:
-            main = main + f"{wc.get_emoji(code)} {screen_temp} {wc.get_string(code)}"
-            tooltip += main + "\n"
+            main = f"{wc.get_emoji(code)} {screen_temp}°C {wc.get_string(code)}"
+            tooltip = main + "\n"
             tooltip += f"Feels Like: {data["feels_like"]}°C\n"
             tooltip += f"Wind: {data["wind_speed"]} mph {wc.get_wind(direction)}\n"
             tooltip += f"Humidity: {data["humidity"]}%\n"
@@ -159,10 +192,7 @@ def format_today(today_data, loc: str = None, wc = WeatherCode()) -> tuple:
             tooltip += f"Max: {max_today}°C Min: {min_today}°C Total Precipitation: {precip_today}mm\n"
         else:
             hour = dt.datetime.fromisoformat(timestamp[timestamp.find(":")+1:])
-            spaces = 3 - len(str(data["screen_temp"]))
-            screen_temp = " " * spaces + screen_temp
-            tooltip += f"{hour.strftime("%H:%M")}\t"
-            tooltip += f"{wc.get_emoji(code)} {screen_temp} {wc.get_string(code)}\n"
+            tooltip += TooltipLine(code, hour, screen_temp).format_line(wc)
 
     return (main, tooltip)
 
@@ -191,11 +221,7 @@ def format_future(future_data, tooltip, wc = WeatherCode()) -> str:
         tooltip += f"Max: {max_day}°C Min: {min_day}°C Total Precipitation: {precip_day}mm\n"
         for timestamp, data in day_data.items():
             hour = dt.datetime.fromisoformat(timestamp[timestamp.find(":")+1:])
-            code = data["weather_code"]
-            spaces = 3 - len(str(data["screen_temp"]))
-            screen_temp = " " * spaces + f"{data["screen_temp"]}°C"
-            tooltip += f"{hour.strftime("%H:%M")}\t"
-            tooltip += f"{wc.get_emoji(code)} {screen_temp} {wc.get_string(code)}\n"
+            tooltip += TooltipLine(data["weather_code"], hour, data["screen_temp"]).format_line(wc)
 
     return tooltip[:-1] #  Remove the last newline
 
