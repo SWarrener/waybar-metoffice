@@ -35,5 +35,5 @@ Restart waybar and the module should appear with the current weather for the loc
     -l Sets if you want a string containing your location returned and included in the forecast. Options are TRUE or FALSE. Defaults to TRUE.
 
 ## Thanks
-UK Met Office for providing the weather API and example download scripts
-Wttrbar for providing inspiration on how to format the final output.
+- UK Met Office for providing the weather API and example download scripts
+- Wttrbar for providing inspiration on how to format the final output.
