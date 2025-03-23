@@ -2,7 +2,7 @@
 
 A waybar custom module that uses the UK met office to provide weather forecasting information. This should work anywhere in the world, but will be more accurate for places in the UK when compared with other countries. Requires a third party account (with the UK met office) to function.
 
-This module should work anywhere in the world, but if you are outside the UK, then I would recommend using this [wttrbar](https://github.com/bjesus/wttrbar), which will likely give more accurate forecasts.
+This module should work anywhere in the world, but if you are outside the UK, then I would recommend using [wttrbar](https://github.com/bjesus/wttrbar), which will likely give more accurate forecasts.
 
 ## Usage
 
