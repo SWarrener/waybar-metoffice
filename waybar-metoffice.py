@@ -108,7 +108,7 @@ def extract_data(forecast_data: str, loc: str) -> tuple:
     return (weather_data, loc_data)
 
 
-def process_weather_data(hourly_weather_data: str, three_hourly_weather_data: str, days_wanted: int) -> dict:
+def process_weather_data(hourly_weather_data: list, three_hourly_weather_data: list, days_wanted: int) -> dict:
     '''
     Takes the data we want from the 2 forecasts and combines them into one
     dictionary, with the hourly data for the current day and the three hourly data
@@ -122,6 +122,9 @@ def process_weather_data(hourly_weather_data: str, three_hourly_weather_data: st
     Returns:
         dict: the combined weather data
     '''
+    non_uk = False
+    if "maxScreenAirTemp" not in hourly_weather_data[0]:
+        non_uk = True
     weather_data = {}
     for data in hourly_weather_data:
         timestamp = dt.datetime.fromisoformat(data["time"]).astimezone()
@@ -130,18 +133,24 @@ def process_weather_data(hourly_weather_data: str, three_hourly_weather_data: st
         weather_data["Hourly:" + str(timestamp)] = {
             "screen_temp": int(round(data["screenTemperature"], 0)),
             "weather_code": data["significantWeatherCode"],
-            "max_screen_temp": int(round(data["minScreenAirTemp"], 0)),
-            "min_screen_temp": int(round(data["minScreenAirTemp"], 0)),
             "wind_speed": int(round(data["windSpeed10m"], 0)),
             "wind_direction": data["windDirectionFrom10m"],
             "humidity": int(round(data["screenRelativeHumidity"], 0)),
             "feels_like": int(round(data["feelsLikeTemperature"], 0)),
-            "precip_amount": data["totalPrecipAmount"]
         }
+        if not non_uk: # Non UK data does not have these entries.
+            weather_data["Hourly:" + str(timestamp)]["max_screen_temp"] = int(round(data["maxScreenAirTemp"], 0))
+            weather_data["Hourly:" + str(timestamp)]["min_screen_temp"] = int(round(data["minScreenAirTemp"], 0))
+            weather_data["Hourly:" + str(timestamp)]["precip_amount"] = data["totalPrecipAmount"]
 
     for data in three_hourly_weather_data:
         timestamp = dt.datetime.fromisoformat(data["time"]).astimezone()
         if timestamp.date() == dt.date.today():
+            if non_uk:
+                if "Hourly:" + str(timestamp) in weather_data:
+                    weather_data["Hourly:" + str(timestamp)]["max_screen_temp"] = int(round(data["maxScreenAirTemp"], 0))
+                    weather_data["Hourly:" + str(timestamp)]["min_screen_temp"] = int(round(data["minScreenAirTemp"], 0))
+                    weather_data["Hourly:" + str(timestamp)]["precip_amount"] = data["totalPrecipAmount"]
             continue
         if timestamp.date() == dt.date.today() + dt.timedelta(days_wanted+1):
             break #  Removes the partial day from the end of the forecast
@@ -171,9 +180,15 @@ def format_today(today_data, loc: str = None, wc = WeatherCode()) -> tuple:
     Returns:
         tuple(str, str): A tuple containing the main string and the tooltip string
     '''
-    max_today = max(data["max_screen_temp"] for data in today_data.values())
-    min_today = min(data["min_screen_temp"] for data in today_data.values())
-    precip_today = round(sum(data["precip_amount"] for data in today_data.values()),2)
+    try:
+        max_today = max(data["max_screen_temp"] for data in today_data.values() if "max_screen_temp" in data)
+        min_today = min(data["min_screen_temp"] for data in today_data.values() if "min_screen_temp" in data)
+        precip_today = round(sum(data["precip_amount"] for data in today_data.values() if "precip_amount" in data),2)
+    except TypeError:
+        # This deals with the case that there is no data for the above, which may occur towards the end of the day for non UK datasets
+        max_today = max(data["feels_like"] for data in today_data.values())
+        min_today = min(data["feels_like"] for data in today_data.values())
+        precip_today = 0.0
     for i, (timestamp, data) in enumerate(today_data.items()):
         code = data["weather_code"]
         screen_temp = data["screen_temp"]
